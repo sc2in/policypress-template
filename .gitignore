@@ -1,1 +1,5 @@
 public/
+themes/
+.pre-commit-config.yaml
+mermaid-filter.err
+.claude/
