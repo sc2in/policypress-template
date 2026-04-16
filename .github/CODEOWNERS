@@ -1,0 +1,7 @@
+# All policy files require CISO sign-off before merging.
+# Replace @your-org/ciso with the GitHub team or username for your CISO.
+content/policies/ @your-org/ciso
+
+# Config and workflow changes require a maintainer review.
+config.toml @your-org/policypress-maintainers
+.github/ @your-org/policypress-maintainers
