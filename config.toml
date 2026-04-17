@@ -6,7 +6,7 @@ base_url = "https://sc2in.github.io/policypress-template/"
 # Do not change this value.
 theme = "policypress"
 
-title = "Policies"
+title = "Security Policy Center"
 description = "Information security and compliance policies."
 default_language = "en"
 compile_sass = true
@@ -62,6 +62,9 @@ pdf_color = "#0e90f3"
 # Path to your policies directory, relative to content/.
 policy_dir = "policies/"
 
+# Path to the policies section index, used by report templates.
+policy_root = "policies/_index.md"
+
 # Set to true to render a redaction bar over {% redact() %}...{% end %} blocks
 # on the website. Does not affect PDF generation - use --redact on the CLI for PDFs.
 redact_web = false
@@ -75,13 +78,31 @@ name = "Security Team"
 email = "security@example.com"
 
 [extra.menu]
-logo = "/logo.png"
+logo = "logo.png"
 
 [[extra.menu.main]]
 title = "Policies"
 section = "policies"
 url = "/policies/"
 weight = 10
+
+[[extra.menu.main]]
+title = "Team"
+section = "team"
+url = "/team/"
+weight = 20
+
+[[extra.menu.main]]
+title = "Reports"
+section = "reports"
+url = "/reports/"
+weight = 30
+
+[[extra.menu.main]]
+title = "News"
+section = "news"
+url = "/news/"
+weight = 40
 
 [[extra.social]]
 name = "github"
