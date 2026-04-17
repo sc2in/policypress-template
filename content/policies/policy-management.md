@@ -59,7 +59,7 @@ Each policy file must include complete frontmatter:
 
 Policies under active drafting must set `draft: true` in their frontmatter. Draft policies are excluded from PDF generation (and hidden from the site index unless `show_draft_pdfs = true` is set in `config.toml`). The `draft` flag is removed when the policy is ready for approval.
 
-The `{{ org() }}` shortcode must be used wherever the organization name appears in policy text. This ensures the name stays consistent and correct if it ever changes.
+The `{{/* org() */}}` shortcode must be used wherever the organization name appears in policy text. This ensures the name stays consistent and correct if it ever changes.
 
 ### 2. Review
 
