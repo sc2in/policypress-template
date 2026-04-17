@@ -1,6 +1,6 @@
 # The URL your policy site will be published at.
 # Used for internal links and the site's canonical URL.
-base_url = "https://policies.example.com"
+base_url = "https://sc2in.github.io/policypress-template/"
 
 # The policypress theme is fetched automatically by the GitHub Action.
 # Do not change this value.
