@@ -1,19 +1,23 @@
 # The URL your policy site will be published at.
 # Used for internal links and the site's canonical URL.
-base_url = "https://sc2in.github.io/policypress-template/"
+base_url = "https://policies.example.com"
 
 # The policypress theme is fetched automatically by the GitHub Action.
 # Do not change this value.
 theme = "policypress"
 
-title = "Security Policy Center"
+title = "Policies"
 description = "Information security and compliance policies."
 default_language = "en"
 compile_sass = true
 minify_html = false
 generate_feeds = false
 build_search_index = true
-generate_sitemap = true
+# Private by default: no sitemap, so the site does not enumerate every policy
+# URL for search engines. robots.txt is still generated (as `Disallow: /` while
+# [extra.policypress] private = true). Set generate_sitemap = true only if you
+# also set private = false to publish an intentionally public policy site.
+generate_sitemap = false
 generate_robots_txt = true
 
 [[taxonomies]]
@@ -47,8 +51,29 @@ landing_page = true
 blog = false
 policypress_version = "1"
 
+# Homepage layout: "dashboard" (default) shows a compliance dashboard built from
+# your policies (policy count, reviews overdue, framework coverage, review
+# status). "marketing" shows a landing page driven by the [extra.frontpage] keys
+# below. Internal ISMS sites usually want "dashboard".
+homepage_style = "dashboard"
+
+# Optional: brand color for the web theme (buttons, links, accents). Set it to
+# the same value as pdf_color so the site and PDFs share one brand color.
+# Omit to use the theme's default. Applied at load time - no SCSS recompile.
+# brand_color = "#0e90f3"
+
 # PolicyPress configuration
 [extra.policypress]
+# Website visibility. `true` (the default for this starter) treats the site as
+# confidential/internal: every page emits `noindex, nofollow` and robots.txt is
+# `Disallow: /`, so search engines will not index your policies even if the URL
+# leaks. This does NOT authenticate anyone — it only controls discoverability.
+# Put the site behind SSO/VPN to actually restrict who can read it; the shipped
+# static/staticwebapp.config.json gives you Azure AD SSO in a few fields. See the
+# "Securing your repository" guide. Set to `false` only for an intentionally
+# public policy site (and then also set generate_sitemap = true above).
+private = true
+
 # Your organization's name. Used in PDF headers, footers, and policy text
 # wherever the {{ org() }} shortcode appears.
 organization = "Example Corp"
@@ -62,23 +87,69 @@ pdf_color = "#0e90f3"
 # Path to your policies directory, relative to content/.
 policy_dir = "policies/"
 
-# Path to the policies section index, used by report templates.
-policy_root = "policies/_index.md"
+# Renders a redaction bar over {% redact() %}...{% end %} blocks on the *website*.
+# Defaults to true as defense in depth: even on a private, access-controlled
+# deployment, internal notes wrapped in {% redact() %} then never reach the
+# site's HTML or search index. Web-only (#115); does not itself affect PDFs.
+redact_web = true
 
-# Set to true to render a redaction bar over {% redact() %}...{% end %} blocks
-# on the website. Does not affect PDF generation - use --redact on the CLI for PDFs.
-redact_web = false
+# Redact the *PDFs* too (mask {% redact() %} spans and add the "__Redacted__"
+# filename infix). Defaults to true here for the same reason as redact_web: the
+# PDFs are published to the same public Pages site, so leaving them full would
+# leak the masked content. Keep this in step with redact_web so the site's PDF
+# links resolve (#159). --redact/--no-redact (redact_mode in the action)
+# override it.
+redact = true
 
 # Set to true to stamp all PDFs with a DRAFT watermark by default.
 # Can be overridden per-run with --draft / --no-draft.
 show_draft_pdfs = false
 
+# Point at an SCF report page to make inline {{ control(id="…") }} references and
+# SCF framework tags link to it. Left unset here, so those references render as
+# plain (unlinked) control ids — the shortcode degrades gracefully.
+# scf_report_page = "@/reports/scf.md"
+
+# Optional: add a content/news/ section and point this at it to surface a "Recent
+# updates" panel on the homepage. Left unset - the lean starter ships no news feed -
+# so the homepage simply omits that panel.
+# news_page = "news/_index.md"
+
+# Accept native Markdown footnote references to controls ([^IAC-01]) as an
+# alternative to the {{ control(id="IAC-01") }} shortcode (#173). Off by default:
+# the shortcode needs no extra build step and works in a plain `zola serve`. With
+# this on, the GitHub Action's build synthesises the footnote definitions (via
+# `policypress stage-site`) so the references resolve on the site the way they do
+# in the PDF. See the "Compliance frameworks" guide.
+# control_footnotes = true
+
+# Path to the praxis control-join file (the list of SCF ids an external GRC
+# system actively governs). When set, SCF surfaces gain a "praxis" in-spine
+# marker and a spine-coverage bar. Regenerate with `nix run .#gen-praxis-join`.
+# Left unset here so the starter shows the plain, unmarked baseline.
+# praxis_join = "data/praxis-join.json"
+
 [extra.author]
 name = "Security Team"
 email = "security@example.com"
 
+# Byline roster (optional, safe to leave as-is). When a policy's owner,
+# approved_by, or revised_by matches a member `name` below AND that member has a
+# `page`, the name becomes a link to that team profile; every other name - and any
+# member without a `page` - simply renders as plain text. Add your real approvers
+# here, and set `page = "team/<file>.md"` once you create a matching profile under
+# content/team/ to turn a byline into a link.
+[extra.policyteam]
+[[extra.policyteam.members]]
+name = "IT / Security"
+# page = "team/it-security.md"
+
+[[extra.policyteam.members]]
+name = "CEO"
+# page = "team/ceo.md"
+
 [extra.menu]
-logo = "logo.png"
+logo = "/logo.png"
 
 [[extra.menu.main]]
 title = "Policies"
@@ -86,28 +157,12 @@ section = "policies"
 url = "/policies/"
 weight = 10
 
-[[extra.menu.main]]
-title = "Team"
-section = "team"
-url = "/team/"
-weight = 20
-
-[[extra.menu.main]]
-title = "Reports"
-section = "reports"
-url = "/reports/"
-weight = 30
-
-[[extra.menu.main]]
-title = "News"
-section = "news"
-url = "/news/"
-weight = 40
-
 [[extra.social]]
 name = "github"
 url = "https://github.com/example"
 
+# These keys apply only when homepage_style = "marketing". In the default
+# "dashboard" layout they are ignored (except features.cards, shown as tiles).
 [extra.frontpage]
 [extra.frontpage.hero]
 title = "Security Policies"
